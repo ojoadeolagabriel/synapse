@@ -1,0 +1,9 @@
+rootProject.name = 'synapse-io'
+include 'synapse-config-server'
+include 'synapse-config-client'
+include 'synapse-discovery-client'
+include 'synapse-data'
+include 'synapse-tests'
+include 'synapse-kafka-io'
+
+gradle.ext.app_version = '1.0'

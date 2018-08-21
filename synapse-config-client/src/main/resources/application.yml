@@ -1,0 +1,13 @@
+management:
+  endpoints:
+    web:
+      exposure:
+       include: '*'
+
+server:
+  servlet:
+    context-path: /client
+
+spring:
+  profiles:
+    active: 'development'
