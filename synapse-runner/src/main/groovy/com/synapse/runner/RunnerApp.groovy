@@ -4,37 +4,45 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.synapse.runner.dto.PayinOrderFilePayload
 import com.synapse.task.TaskService
-import com.synapse.task.config.SynapseTask
+import com.synapse.task.event.CompletionEvent
+import com.synapse.task.context.MessageContext
 import com.synapse.task.event.SynapseEvent
 
 import java.time.Clock
 
 class RunnerApp {
-    static ObjectMapper mapper = new ObjectMapper()
 
+    static ObjectMapper mapper = new ObjectMapper()
     static void main(String[] args) {
         def taskService = new TaskService()
+        def testTopic = "topic.handler-x"
+        def messagePrefix = "PAYIN"
 
         //handle things
-        taskService.deployTaskProcessor("topic.handler", {
-            payload -> System.out.println("received payload: $payload")
+        taskService.completeTask(testTopic, {
+            payload ->
+                System.out.println("received payload: $payload")
+                PayinOrderFilePayload load = mapper.readValue(payload, PayinOrderFilePayload)
+                return load ? true : false
         })
 
         //deploy new task
-        taskService.deployTask(new SynapseTask({
+        taskService.startTask(new MessageContext({
             SynapseEvent event = new SynapseEvent()
-            event.setTopic("topic.handler")
-            event.setKey("PAYIN_" + Clock.systemDefaultZone().millis())
-            event.setMessage(buildPayload())
+            event.setTopic(testTopic)
+            event.setKey(String.format("%s_%s", messagePrefix, Clock.systemDefaultZone().millis()))
+            event.setMessage(payloadBuilder())
             return event
-        }))
+        }), { CompletionEvent body ->
+            System.out.println("booom.. its here: $body.success")
+        })
     }
 
     /**
      * build payload
      * @return
      */
-    private static String buildPayload() {
+    private static String payloadBuilder() {
         PayinOrderFilePayload payload = new PayinOrderFilePayload()
         payload.setPspReference("PSP10001" + Clock.systemDefaultZone().millis().toString() + "REF")
         payload.setRequestId(Clock.systemDefaultZone().millis().toString())

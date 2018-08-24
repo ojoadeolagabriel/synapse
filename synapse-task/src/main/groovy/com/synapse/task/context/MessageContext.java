@@ -1,20 +1,23 @@
-package com.synapse.task.config;
+package com.synapse.task.context;
 
+import com.synapse.task.config.KafkaSynapseConfig;
 import com.synapse.task.event.SynapseEvent;
 import com.synapse.task.handler.SynapseTaskHandler;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 
-public class SynapseTask extends AbstractVerticle {
+public class MessageContext extends AbstractVerticle {
+
     SynapseTaskHandler handle;
     private KafkaSynapseConfig config;
+    public SynapseEvent synapseEvent;
 
-    public SynapseTask(SynapseTaskHandler handler) {
+    public MessageContext(SynapseTaskHandler handler) {
         this.handle = handler;
     }
 
     public void start() {
-        SynapseEvent synapseEvent = handle.handle();
+        synapseEvent = handle.handle();
         processEvent(synapseEvent);
     }
 
