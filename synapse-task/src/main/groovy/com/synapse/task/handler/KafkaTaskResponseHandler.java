@@ -1,5 +1,7 @@
 package com.synapse.task.handler;
 
+import com.synapse.task.context.EventState;
+
 public interface KafkaTaskResponseHandler {
-    boolean handle(String payload);
+    EventState handle(String payload);
 }

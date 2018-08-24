@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.synapse.runner.dto.PayinOrderFilePayload
 import com.synapse.task.TaskService
+import com.synapse.task.context.EventState
 import com.synapse.task.event.CompletionEvent
 import com.synapse.task.context.MessageContext
 import com.synapse.task.event.SynapseEvent
@@ -23,7 +24,7 @@ class RunnerApp {
             payload ->
                 System.out.println("received payload: $payload")
                 PayinOrderFilePayload load = mapper.readValue(payload, PayinOrderFilePayload)
-                return load ? true : false
+                return load ? EventState.Success : EventState.Failed
         })
 
         //deploy new task
@@ -34,7 +35,7 @@ class RunnerApp {
             event.setMessage(payloadBuilder())
             return event
         }), { CompletionEvent body ->
-            System.out.println("booom.. its here: $body.success")
+            System.out.println("booom.. its here: $body.state")
         })
     }
 

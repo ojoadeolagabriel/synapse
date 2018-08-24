@@ -1,6 +1,7 @@
 package com.synapse.task;
 
 import com.synapse.task.config.KafkaSynapseConfig;
+import com.synapse.task.context.EventState;
 import com.synapse.task.handler.ProcessCompletionHandler;
 import com.synapse.task.event.CompletionEvent;
 import com.synapse.task.context.MessageContext;
@@ -11,7 +12,7 @@ public class TaskService {
     KafkaSynapseConfig config;
 
     TaskService() {
-        config = new KafkaSynapseConfig();
+        config = new KafkaSynapseConfig("localhost:9092", "default_group");
     }
 
     public void startTask(MessageContext task, ProcessCompletionHandler onProcessCompletionHandler) {
@@ -19,9 +20,10 @@ public class TaskService {
 
         config.getVertx().deployVerticle(task, onDeployHandler -> {
             config.getVertx().eventBus().consumer(task.synapseEvent.getKey(), handler -> {
-                boolean result = Boolean.valueOf(handler.body() != null ? handler.body().toString() : "false");
+                EventState state =  EventState.valueOf(handler.body().toString());
+
                 CompletionEvent data = new CompletionEvent();
-                data.setSuccess(result);
+                data.setState(state);
                 onProcessCompletionHandler.handle(data);
             });
         });
@@ -31,8 +33,8 @@ public class TaskService {
         config.kafkaConsumer().subscribe(id, subscribe -> {
             if (subscribe.succeeded()) {
                 config.kafkaConsumer().handler(record -> {
-                    boolean result = handler.handle(record.value());
-                    config.getVertx().eventBus().send(record.key(), result);
+                    EventState result = handler.handle(record.value());
+                    config.getVertx().eventBus().send(record.key(), result.name());
                 });
             }
         });
