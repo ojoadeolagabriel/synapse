@@ -8,7 +8,6 @@ import com.synapse.task.context.MessageContext;
 import com.synapse.task.handler.KafkaTaskResponseHandler;
 
 public class TaskService {
-
     KafkaSynapseConfig config;
 
     TaskService() {
@@ -19,12 +18,18 @@ public class TaskService {
         task.setConfig(config);
 
         config.getVertx().deployVerticle(task, onDeployHandler -> {
-            config.getVertx().eventBus().consumer(task.synapseEvent.getKey(), handler -> {
-                EventState state =  EventState.valueOf(handler.body().toString());
+            persistState(task.synapseEvent.getKey(), EventState.Pending, task.synapseEvent.getMessage());
 
-                CompletionEvent data = new CompletionEvent();
-                data.setState(state);
-                onProcessCompletionHandler.handle(data);
+            config.getVertx().eventBus().consumer(task.synapseEvent.getKey(), handler -> {
+                try {
+                    EventState state = EventState.valueOf(handler.body().toString());
+                    CompletionEvent data = new CompletionEvent();
+                    data.setState(state);
+                    onProcessCompletionHandler.handle(data);
+                    persistState(task.synapseEvent.getKey(), EventState.Closed, task.synapseEvent.getMessage());
+                } catch (Exception e) {
+                    persistState(task.synapseEvent.getKey(), EventState.Retry, task.synapseEvent.getMessage());
+                }
             });
         });
     }
@@ -34,9 +39,14 @@ public class TaskService {
             if (subscribe.succeeded()) {
                 config.kafkaConsumer().handler(record -> {
                     EventState result = handler.handle(record.value());
+                    persistState(id, result, record.value());
                     config.getVertx().eventBus().send(record.key(), result.name());
                 });
             }
         });
+    }
+
+    private void persistState(String id, EventState result, String value) {
+        System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
     }
 }

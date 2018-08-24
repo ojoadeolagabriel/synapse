@@ -35,7 +35,7 @@ class RunnerApp {
             event.setMessage(payloadBuilder())
             return event
         }), { CompletionEvent body ->
-            System.out.println("booom.. its here: $body.state")
+            System.out.println("boom.. its here: $body.state")
         })
     }
 
