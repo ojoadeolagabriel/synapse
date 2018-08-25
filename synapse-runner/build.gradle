@@ -16,6 +16,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'checkstyle'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'idea'
 
@@ -30,8 +31,19 @@ repositories {
     mavenCentral()
 }
 
+checkstyle {
+    toolVersion '7.8.1'
+    configFile file("src/main/resources/config/checkstyle/checkstyle.xml")
+}
+
+checkstyleMain {
+    source = fileTree('.') {
+        excludes = ['.*/**', 'gradle*', 'build/**', '*.iml', '*.log', '**/*.jar']
+    }
+}
+
 dependencies {
-    compile ("org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE"){
+    compile("org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE") {
         exclude module: "logback-classic"
         exclude module: "spring-boot-starter-logging"
     }

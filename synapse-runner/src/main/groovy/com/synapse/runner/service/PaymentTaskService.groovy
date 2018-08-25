@@ -1,7 +1,7 @@
 package com.synapse.runner.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
+import com.synapse.runner.builder.PayinOrderFilePayloadBuilder
 import com.synapse.runner.dto.PayinOrderFilePayload
 import com.synapse.task.TaskService
 import com.synapse.task.context.EventState
@@ -18,11 +18,13 @@ import java.time.Clock
 class PaymentTaskService {
     @Autowired
     TaskService taskService
+
     @Autowired
     ObjectMapper mapper
 
     @PostConstruct
     void init(){
+
         //post params
         def testTopic = "topic.handler-x"
         def messagePrefix = "PAYIN"
@@ -40,24 +42,10 @@ class PaymentTaskService {
             SynapseEvent event = new SynapseEvent()
             event.setTopic(testTopic)
             event.setKey(String.format("%s_%s", messagePrefix, Clock.systemDefaultZone().millis()))
-            event.setMessage(payloadBuilder())
+            event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
             return event
         }), { CompletionEvent body ->
             System.out.println("boom.. its here: $body.state")
         })
-    }
-
-
-    /**
-     * build payload
-     * @return
-     */
-    private String payloadBuilder() {
-        PayinOrderFilePayload payload = new PayinOrderFilePayload()
-        payload.setPspReference("PSP10001" + Clock.systemDefaultZone().millis().toString() + "REF")
-        payload.setRequestId(Clock.systemDefaultZone().millis().toString())
-
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        mapper.writeValueAsString(payload)
     }
 }

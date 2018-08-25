@@ -8,14 +8,22 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class TaskServiceConfig {
     @Bean
-    TaskService taskService(){
+    TaskService taskService() {
         def taskService = new TaskService("localhost:9092", "default_group")
         return taskService
     }
 
     @Bean
-    ObjectMapper objectMapper(){
+    ObjectMapper objectMapper() {
+        if (true)
+            System.out.println("yelz")
+
         ObjectMapper mapper = new ObjectMapper()
         return mapper
+    }
+
+    @Override
+    boolean equals(Object obj) {
+        return super.equals(obj)
     }
 }
