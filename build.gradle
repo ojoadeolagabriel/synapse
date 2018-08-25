@@ -68,32 +68,8 @@ gradle.taskGraph.whenReady() {
     System.out.println mySpecialProjects.size() + " was found in $project.name"
 }
 
-task init (dependsOn: build) {
-    group 'Optimus'
-    description 'Build the doFirst'
-
-    doFirst {
-        println("we are online... root proj: $project.name and  $name")
-    }
-}
-
 tasks.whenTaskAdded { task ->
     task.ext.srcDir = 'src/main/java'
-}
-
-task triggerNemesis(type: CustomTask){
-    greeting = "nemesis..."
-}
-
-
-class CustomTask extends DefaultTask{
-    String greeting
-
-    @TaskAction
-    def process(){
-        logger.info("tttttttttttttttttttttt")
-        println("custom task woooooooooooozer: $greeting")
-    }
 }
 
 task cleanSubProjects {

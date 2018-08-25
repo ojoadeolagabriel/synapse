@@ -1,45 +1,72 @@
 package com.synapse.task;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.task.config.KafkaSynapseConfig;
 import com.synapse.task.context.EventState;
+import com.synapse.task.event.SynapseEvent;
 import com.synapse.task.handler.ProcessCompletionHandler;
 import com.synapse.task.event.CompletionEvent;
-import com.synapse.task.context.MessageContext;
+import com.synapse.task.context.MessagePipeline;
 import com.synapse.task.handler.KafkaTaskResponseHandler;
+import com.synapse.task.handler.SynapseTaskHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TaskService {
-    KafkaSynapseConfig config;
+    public KafkaSynapseConfig config;
+    MessagePipeline messagePipeline;
+    ObjectMapper mapper = new ObjectMapper();
 
     TaskService(String bootStrapServers, String consumerGroup) {
         config = new KafkaSynapseConfig(bootStrapServers, consumerGroup);
     }
 
-    public void taskStarter(MessageContext task, ProcessCompletionHandler onProcessCompletionHandler) {
-        task.setConfig(config);
-        config.getVertx().deployVerticle(task, onDeployHandler -> {
-            persistState(task.synapseEvent.getKey(), EventState.Pending, task.synapseEvent.getMessage());
+    public void taskStarter(SynapseTaskHandler eventHandler, ProcessCompletionHandler onProcessCompletionHandler) {
+        SynapseEvent event = eventHandler.handle();
+        if (messagePipeline == null) {
+            messagePipeline = new MessagePipeline(config);
 
-            config.getVertx().eventBus().consumer(task.synapseEvent.getKey(), handler -> {
+            //deploy pipeline handler
+            config.getVertx().deployVerticle(messagePipeline, deployCompletionHandler -> {
+
+            });
+        }
+
+        //send message
+        try {
+            String payload = mapper.writeValueAsString(event);
+
+            //setup close
+            config.getVertx().eventBus().consumer(event.getKey(), handler -> {
                 try {
                     EventState state = EventState.valueOf(handler.body().toString());
                     CompletionEvent data = new CompletionEvent();
                     data.setState(state);
                     onProcessCompletionHandler.handle(data);
-                    persistState(task.synapseEvent.getKey(), EventState.Closed, task.synapseEvent.getMessage());
+                    persistState(event.getKey(), EventState.Closed, event.getMessage());
                 } catch (Exception e) {
-                    persistState(task.synapseEvent.getKey(), EventState.Retry, task.synapseEvent.getMessage());
+                    persistState(event.getKey(), EventState.Retry, event.getMessage());
                 }
             });
-        });
+
+            config.getVertx().eventBus().send("::synapse.message.pipeline::", payload, replyHandler -> {
+                if (replyHandler.succeeded()) {
+
+                } else {
+                    System.out.println("could not push: " + payload + " reason: " +replyHandler.cause().getMessage());
+                }
+            });
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void taskCompletion(String id, KafkaTaskResponseHandler handler) {
+    public void taskCompletion(String id, KafkaTaskResponseHandler completionHandler) {
         config.kafkaConsumer().subscribe(id, subscribe -> {
             if (subscribe.succeeded()) {
                 config.kafkaConsumer().handler(record -> {
-                    EventState result = handler.handle(record.value());
+                    EventState result = completionHandler.handle(record.value());
                     persistState(id, result, record.value());
                     config.getVertx().eventBus().send(record.key(), result.name());
                 });
@@ -48,6 +75,6 @@ public class TaskService {
     }
 
     private void persistState(String id, EventState result, String value) {
-        System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
+        //System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
     }
 }

@@ -34,7 +34,7 @@ class KafkaSynapseConfig {
             config.put("enable.auto.commit", "true")
             consumer = KafkaConsumer.create(getVertx(), config)
         }
-        return consumer;
+        return consumer
     }
 
     KafkaProducer<String, String> kafkaProducer() {
