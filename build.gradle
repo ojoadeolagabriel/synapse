@@ -96,18 +96,6 @@ class CustomTask extends DefaultTask{
     }
 }
 
-task zipOutPut(type: Zip){
-    from '/tendon'
-    include '*'
-    include '*/*'
-    archiveName "tw-pluggins.zip"
-    destinationDir(file('c://zipper-x/'))
-
-    doLast {
-        println ("app_name: $applicationNameX")
-    }
-}
-
 task cleanSubProjects {
     subprojects.each {
         it.afterEvaluate {

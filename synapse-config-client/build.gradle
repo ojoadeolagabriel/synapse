@@ -26,7 +26,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile('com.synapse.io:synapse-util:1.2.RELEASE')
     compile('org.springframework.cloud:spring-cloud-starter-config:2.0.1.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-web')
