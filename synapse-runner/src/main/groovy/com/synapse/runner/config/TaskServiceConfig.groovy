@@ -15,15 +15,7 @@ class TaskServiceConfig {
 
     @Bean
     ObjectMapper objectMapper() {
-        if (true)
-            System.out.println("yelz")
-
         ObjectMapper mapper = new ObjectMapper()
         return mapper
-    }
-
-    @Override
-    boolean equals(Object obj) {
-        return super.equals(obj)
     }
 }
