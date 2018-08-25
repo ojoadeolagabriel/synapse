@@ -22,8 +22,8 @@ public class TaskService {
         config = new KafkaSynapseConfig(bootStrapServers, consumerGroup);
     }
 
-    public void taskStarter(SynapseTaskHandler eventHandler, ProcessCompletionHandler onProcessCompletionHandler) {
-        SynapseEvent event = eventHandler.handle();
+    public void taskStarter(SynapseTaskHandler eventBuildHandler, ProcessCompletionHandler onProcessCompletionHandler) {
+        SynapseEvent event = eventBuildHandler.handle();
         if (messagePipeline == null) {
             messagePipeline = new MessagePipeline(config);
 

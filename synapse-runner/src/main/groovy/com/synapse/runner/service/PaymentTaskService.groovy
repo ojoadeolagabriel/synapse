@@ -38,7 +38,7 @@ class PaymentTaskService {
         })
 
         AtomicLong counter = new AtomicLong()
-        taskService.config.getVertx().setPeriodic(1, { handler ->
+        taskService.config.getVertx().setPeriodic(3000, { handler ->
 
             //deploy new task
             taskService.taskStarter({
