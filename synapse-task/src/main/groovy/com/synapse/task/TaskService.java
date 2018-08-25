@@ -6,17 +6,18 @@ import com.synapse.task.handler.ProcessCompletionHandler;
 import com.synapse.task.event.CompletionEvent;
 import com.synapse.task.context.MessageContext;
 import com.synapse.task.handler.KafkaTaskResponseHandler;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TaskService {
     KafkaSynapseConfig config;
 
-    TaskService() {
-        config = new KafkaSynapseConfig("localhost:9092", "default_group");
+    TaskService(String bootStrapServers, String consumerGroup) {
+        config = new KafkaSynapseConfig(bootStrapServers, consumerGroup);
     }
 
-    public void startTask(MessageContext task, ProcessCompletionHandler onProcessCompletionHandler) {
+    public void taskStarter(MessageContext task, ProcessCompletionHandler onProcessCompletionHandler) {
         task.setConfig(config);
-
         config.getVertx().deployVerticle(task, onDeployHandler -> {
             persistState(task.synapseEvent.getKey(), EventState.Pending, task.synapseEvent.getMessage());
 
@@ -34,7 +35,7 @@ public class TaskService {
         });
     }
 
-    public void completeTask(String id, KafkaTaskResponseHandler handler) {
+    public void taskCompletion(String id, KafkaTaskResponseHandler handler) {
         config.kafkaConsumer().subscribe(id, subscribe -> {
             if (subscribe.succeeded()) {
                 config.kafkaConsumer().handler(record -> {

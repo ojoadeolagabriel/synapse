@@ -1,12 +1,29 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.3.RELEASE")
+    }
+}
+
 plugins {
     id 'groovy'
     id 'java'
 }
 
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'idea'
+
 group 'com.transferwise'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenLocal()
@@ -14,6 +31,10 @@ repositories {
 }
 
 dependencies {
+    compile ("org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE"){
+        exclude module: "logback-classic"
+        exclude module: "spring-boot-starter-logging"
+    }
     compile project(":synapse-task")
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
     compile 'org.codehaus.groovy:groovy-all:2.3.11'
