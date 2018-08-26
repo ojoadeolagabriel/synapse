@@ -3,6 +3,7 @@ package com.synapse.task.context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.task.config.KafkaSynapseConfig;
 import com.synapse.task.event.SynapseEvent;
+import com.synapse.task.util.Constants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 
@@ -18,7 +19,7 @@ public class MessagePipeline extends AbstractVerticle {
     }
 
     public void start() {
-        vertx.eventBus().consumer("::synapse.message.pipeline::", handler -> {
+        vertx.eventBus().consumer(Constants.DEFAULT_MESSAGE_PIPELINE, handler -> {
             Object objBody = handler.body();
             if (objBody != null) {
                 try {

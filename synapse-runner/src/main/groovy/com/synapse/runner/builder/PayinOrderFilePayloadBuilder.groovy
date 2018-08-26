@@ -1,20 +1,18 @@
 package com.synapse.runner.builder
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.synapse.runner.dto.PayinOrderFilePayload
+import com.synapse.task.util.Constants
 
 import java.time.Clock
+import java.time.Instant
 
 class PayinOrderFilePayloadBuilder {
-    private static ObjectMapper mapper = new ObjectMapper()
 
-    private static String payloadBuilder() {
+    static String payloadBuilder() {
         PayinOrderFilePayload payload = new PayinOrderFilePayload()
-        payload.setPspReference("PSP10001" + Clock.systemDefaultZone().millis().toString() + "REF")
+        payload.setPspReference("PREF001" + Clock.systemDefaultZone().millis().toString() + "VIM")
         payload.setRequestId(Clock.systemDefaultZone().millis().toString())
-
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        mapper.writeValueAsString(payload)
+        payload.setDate(Date.from(Instant.now()))
+        Constants.mapper.writeValueAsString(payload)
     }
 }

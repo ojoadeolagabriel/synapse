@@ -10,13 +10,18 @@ import com.synapse.task.event.CompletionEvent;
 import com.synapse.task.context.MessagePipeline;
 import com.synapse.task.handler.KafkaTaskResponseHandler;
 import com.synapse.task.handler.SynapseTaskHandler;
+import com.synapse.task.util.Constants;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.UUID;
+
+import static com.synapse.task.context.EventState.*;
 
 @Slf4j
 public class TaskService {
     public KafkaSynapseConfig config;
-    MessagePipeline messagePipeline;
-    ObjectMapper mapper = new ObjectMapper();
+    private MessagePipeline messagePipeline;
+    private ObjectMapper mapper = new ObjectMapper();
     private static final Object lock = new Object();
 
     TaskService(String bootStrapServers, String consumerGroup) {
@@ -31,7 +36,8 @@ public class TaskService {
 
                 //deploy pipeline handler
                 config.getVertx().deployVerticle(messagePipeline, deployCompletionHandler -> {
-                    System.out.println("Task message pipeline: " + event.getTopic() + " active");
+                    UUID uuid = UUID.nameUUIDFromBytes((event.getKey() + event.getTopic()).getBytes());
+                    persistState(event.getKey(), Pending, event.getMessage());
                 });
             }
         }
@@ -39,22 +45,23 @@ public class TaskService {
         try {
             String payload = mapper.writeValueAsString(event);
 
-            //setup close
+            //setup completion first
             config.getVertx().eventBus().consumer(event.getKey(), handler -> {
                 try {
                     EventState state = EventState.valueOf(handler.body().toString());
                     CompletionEvent data = new CompletionEvent();
                     data.setState(state);
                     onProcessCompletionHandler.handle(data);
-                    persistState(event.getKey(), EventState.Closed, event.getMessage());
+                    persistState(event.getKey(), Closed, event.getMessage());
                 } catch (Exception e) {
-                    persistState(event.getKey(), EventState.Retry, event.getMessage());
+                    persistState(event.getKey(), Retry, event.getMessage());
                 }
             });
 
-            config.getVertx().eventBus().send("::synapse.message.pipeline::", payload, replyHandler -> {
+            //send message
+            config.getVertx().eventBus().send(Constants.DEFAULT_MESSAGE_PIPELINE, payload, replyHandler -> {
                 if (replyHandler.succeeded()) {
-
+                    //handle successfully received message
                 } else {
                     System.out.println("could not push: " + payload + " reason: " + replyHandler.cause().getMessage());
                 }
@@ -78,5 +85,9 @@ public class TaskService {
 
     private void persistState(String id, EventState result, String value) {
         System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
+    }
+
+    private void persistState(String uuid, String id, EventState result, String value) {
+        System.out.println(String.format("persisting.. %s %s, %s, %s", uuid, id, result.name(), value));
     }
 }

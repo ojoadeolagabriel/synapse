@@ -8,16 +8,16 @@ class PayinOrderFilePayload {
     private String requestId
     private String pspReference
 
-    Instant getCurrentTimestamp() {
-        return currentTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm a z")
+    public Date date
+
+    Date getDate() {
+        return date
     }
 
-    void setCurrentTimestamp(Instant currentTimestamp) {
-        this.currentTimestamp = currentTimestamp
+    void setDate(Date date) {
+        this.date = date
     }
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
-    public Date currentTimestamp
 
     String getRequestId() {
         return requestId

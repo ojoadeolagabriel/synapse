@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
 import java.time.Clock
-import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class PaymentTaskService {
@@ -34,12 +33,12 @@ class PaymentTaskService {
         taskService.completeTask(testTopic, {
             payload ->
                 System.out.println("completion received for payload: $payload")
-                PayinOrderFilePayload load = mapper.readValue(payload, PayinOrderFilePayload)
+                PayinOrderFilePayload load = Constants.mapper.readValue(payload, PayinOrderFilePayload)
                 return load ? EventState.Success : EventState.Failed
         })
 
+        //periodic task generation
         taskService.config.getVertx().setPeriodic(5000, { handler ->
-
             //deploy new task
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
