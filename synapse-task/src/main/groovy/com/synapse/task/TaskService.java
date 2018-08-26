@@ -17,23 +17,25 @@ public class TaskService {
     public KafkaSynapseConfig config;
     MessagePipeline messagePipeline;
     ObjectMapper mapper = new ObjectMapper();
+    private static final Object lock = new Object();
 
     TaskService(String bootStrapServers, String consumerGroup) {
         config = new KafkaSynapseConfig(bootStrapServers, consumerGroup);
     }
 
-    public void taskStarter(SynapseTaskHandler eventBuildHandler, ProcessCompletionHandler onProcessCompletionHandler) {
+    public void executeTask(SynapseTaskHandler eventBuildHandler, ProcessCompletionHandler onProcessCompletionHandler) {
         SynapseEvent event = eventBuildHandler.handle();
-        if (messagePipeline == null) {
-            messagePipeline = new MessagePipeline(config);
+        synchronized (lock) {
+            if (messagePipeline == null) {
+                messagePipeline = new MessagePipeline(config);
 
-            //deploy pipeline handler
-            config.getVertx().deployVerticle(messagePipeline, deployCompletionHandler -> {
-
-            });
+                //deploy pipeline handler
+                config.getVertx().deployVerticle(messagePipeline, deployCompletionHandler -> {
+                    System.out.println("Task message pipeline: " + event.getTopic() + " active");
+                });
+            }
         }
 
-        //send message
         try {
             String payload = mapper.writeValueAsString(event);
 
@@ -54,7 +56,7 @@ public class TaskService {
                 if (replyHandler.succeeded()) {
 
                 } else {
-                    System.out.println("could not push: " + payload + " reason: " +replyHandler.cause().getMessage());
+                    System.out.println("could not push: " + payload + " reason: " + replyHandler.cause().getMessage());
                 }
             });
         } catch (JsonProcessingException e) {
@@ -62,7 +64,7 @@ public class TaskService {
         }
     }
 
-    public void taskCompletion(String id, KafkaTaskResponseHandler completionHandler) {
+    public void completeTask(String id, KafkaTaskResponseHandler completionHandler) {
         config.kafkaConsumer().subscribe(id, subscribe -> {
             if (subscribe.succeeded()) {
                 config.kafkaConsumer().handler(record -> {
@@ -75,6 +77,6 @@ public class TaskService {
     }
 
     private void persistState(String id, EventState result, String value) {
-        //System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
+        System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
     }
 }

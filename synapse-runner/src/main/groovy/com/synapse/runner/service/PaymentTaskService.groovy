@@ -7,6 +7,7 @@ import com.synapse.task.TaskService
 import com.synapse.task.context.EventState
 import com.synapse.task.event.CompletionEvent
 import com.synapse.task.event.SynapseEvent
+import com.synapse.task.util.Constants
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -30,25 +31,28 @@ class PaymentTaskService {
         def messagePrefix = "PAYIN"
 
         //handle things
-        taskService.taskCompletion(testTopic, {
+        taskService.completeTask(testTopic, {
             payload ->
                 System.out.println("completion received for payload: $payload")
                 PayinOrderFilePayload load = mapper.readValue(payload, PayinOrderFilePayload)
                 return load ? EventState.Success : EventState.Failed
         })
 
-        AtomicLong counter = new AtomicLong()
-        taskService.config.getVertx().setPeriodic(3000, { handler ->
+        taskService.config.getVertx().setPeriodic(5000, { handler ->
 
             //deploy new task
-            taskService.taskStarter({
+            taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
                 event.setTopic(testTopic)
                 event.setKey(String.format("%s_%s", messagePrefix, Clock.systemDefaultZone().millis()))
                 event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
                 return event
             }, { CompletionEvent body ->
-                System.out.println(counter.addAndGet(1) + ". boom.. its here: $body.state")
+                if (body.state == EventState.Closed) {
+
+                } else if (body.state == EventState.Failed) {
+
+                }
             })
         })
     }

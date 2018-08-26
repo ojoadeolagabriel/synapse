@@ -68,6 +68,18 @@ gradle.taskGraph.whenReady() {
     System.out.println mySpecialProjects.size() + " was found in $project.name"
 }
 
+class Zipro extends DefaultTask{
+    String path
+    @TaskAction
+    def process(){
+
+    }
+}
+
+task zippper(type: Zipro){
+    path = "dex"
+}
+
 tasks.whenTaskAdded { task ->
     task.ext.srcDir = 'src/main/java'
 }
