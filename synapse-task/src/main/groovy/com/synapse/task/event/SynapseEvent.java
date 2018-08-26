@@ -12,6 +12,9 @@ public class SynapseEvent {
     private String message;
     private String partition;
     private Map<String, String> headers = new HashMap<>();
+    public void putHeader(String key, String value){
+        headers.put(key, value);
+    }
 
     public Map<String, String> getHeaders() {
         return headers;

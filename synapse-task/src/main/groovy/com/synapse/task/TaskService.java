@@ -13,8 +13,6 @@ import com.synapse.task.handler.SynapseTaskHandler;
 import com.synapse.task.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.UUID;
-
 import static com.synapse.task.context.EventState.*;
 
 @Slf4j
@@ -36,16 +34,15 @@ public class TaskService {
 
                 //deploy pipeline handler
                 config.getVertx().deployVerticle(messagePipeline, deployCompletionHandler -> {
-                    UUID uuid = UUID.nameUUIDFromBytes((event.getKey() + event.getTopic()).getBytes());
-                    persistState(event.getKey(), Pending, event.getMessage());
+
                 });
             }
         }
 
         try {
-            String payload = mapper.writeValueAsString(event);
+            String payload = Constants.mapper.writeValueAsString(event);
 
-            //setup completion first
+            //setup completion first (3)
             config.getVertx().eventBus().consumer(event.getKey(), handler -> {
                 try {
                     EventState state = EventState.valueOf(handler.body().toString());
@@ -58,7 +55,7 @@ public class TaskService {
                 }
             });
 
-            //send message
+            //send message (1)
             config.getVertx().eventBus().send(Constants.DEFAULT_MESSAGE_PIPELINE, payload, replyHandler -> {
                 if (replyHandler.succeeded()) {
                     //handle successfully received message

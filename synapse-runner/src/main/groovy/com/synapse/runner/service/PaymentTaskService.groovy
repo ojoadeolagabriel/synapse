@@ -27,7 +27,6 @@ class PaymentTaskService {
 
         //post params
         def testTopic = "topic.handler-x"
-        def messagePrefix = "PAYIN"
 
         //handle things
         taskService.completeTask(testTopic, {
@@ -48,16 +47,25 @@ class PaymentTaskService {
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
                 event.setTopic(testTopic)
-                event.setKey(String.format("%s_%s", messagePrefix, Clock.systemDefaultZone().millis()))
+                event.putHeader("::unique::key::", 1)
+                event.setKey(buildKey())
                 event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
                 return event
             }, { CompletionEvent body ->
-                if (body.state == EventState.Closed) {
-
-                } else if (body.state == EventState.Failed) {
-
+                switch (body.state) {
+                    case EventState.Success:
+                    case EventState.Closed:
+                        break
+                    case EventState.Failed:
+                    default:
+                        return
                 }
             })
         })
+    }
+
+    private String buildKey() {
+        def messagePrefix
+        String.format("%s_%s", messagePrefix, Clock.systemDefaultZone().millis())
     }
 }

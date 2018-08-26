@@ -5,6 +5,7 @@ import com.synapse.task.config.KafkaSynapseConfig;
 import com.synapse.task.event.SynapseEvent;
 import com.synapse.task.util.Constants;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 
 import java.io.IOException;
@@ -13,13 +14,15 @@ public class MessagePipeline extends AbstractVerticle {
 
     private static ObjectMapper mapper = new ObjectMapper();
     private KafkaSynapseConfig config;
+    MessageConsumer consumer;
 
     public MessagePipeline(KafkaSynapseConfig config) {
         this.config = config;
     }
 
     public void start() {
-        vertx.eventBus().consumer(Constants.DEFAULT_MESSAGE_PIPELINE, handler -> {
+        //step (2)
+        consumer = vertx.eventBus().consumer(Constants.DEFAULT_MESSAGE_PIPELINE, handler -> {
             Object objBody = handler.body();
             if (objBody != null) {
                 try {
