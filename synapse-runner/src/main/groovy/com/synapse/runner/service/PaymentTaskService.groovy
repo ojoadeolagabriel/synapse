@@ -32,13 +32,18 @@ class PaymentTaskService {
         //handle things
         taskService.completeTask(testTopic, {
             payload ->
-                System.out.println("completion received for payload: $payload")
-                PayinOrderFilePayload load = Constants.mapper.readValue(payload, PayinOrderFilePayload)
-                return load ? EventState.Success : EventState.Failed
+                try {
+                    System.out.println("completion received for payload: $payload")
+                    PayinOrderFilePayload load = Constants.mapper.readValue(payload, PayinOrderFilePayload)
+                    return load ? EventState.Success : EventState.Failed
+                } catch (Exception e) {
+                    e.printStackTrace()
+                    return EventState.Failed
+                }
         })
 
         //periodic task generation
-        taskService.config.getVertx().setPeriodic(5000, { handler ->
+        taskService.config.getVertx().setPeriodic(1000, { handler ->
             //deploy new task
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
