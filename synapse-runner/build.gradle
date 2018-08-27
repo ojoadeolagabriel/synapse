@@ -42,11 +42,15 @@ checkstyleMain {
     }
 }
 
+configurations.all {
+	exclude module: 'slf4j-log4j12'
+}
+
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE") {
-        exclude module: "logback-classic"
         exclude module: "spring-boot-starter-logging"
     }
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile project(":synapse-task")
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
     compile 'org.codehaus.groovy:groovy-all:2.3.11'

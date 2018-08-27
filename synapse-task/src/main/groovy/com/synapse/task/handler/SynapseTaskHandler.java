@@ -1,7 +1,7 @@
 package com.synapse.task.handler;
 
-import com.synapse.task.event.SynapseEvent;
+import com.synapse.task.event.Event;
 
 public interface SynapseTaskHandler {
-    SynapseEvent handle();
+    Event handle();
 }

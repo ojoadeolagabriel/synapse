@@ -5,7 +5,8 @@ enum EventState {
     Failed(0),
     Retry(2),
     Pending(3),
-    Closed(4)
+    Closed(4),
+    DuplicateDetected(5)
 
     private int value
     int getValue(){

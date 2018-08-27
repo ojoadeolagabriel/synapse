@@ -1,6 +1,6 @@
 package com.synapse.task.context
 
-import com.synapse.task.event.SynapseEvent
+import com.synapse.task.event.Event
 import com.synapse.task.handler.MDCHandler
 import org.slf4j.MDC
 
@@ -13,9 +13,9 @@ class MDContext {
         return new MDContext()
     }
 
-    SynapseEvent event
+    Event event
 
-    MDContext setEvent(SynapseEvent event) {
+    MDContext setEvent(Event event) {
         this.event = event
         return this
     }

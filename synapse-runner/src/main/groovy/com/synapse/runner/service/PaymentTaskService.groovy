@@ -1,12 +1,11 @@
 package com.synapse.runner.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.synapse.runner.builder.PayinOrderFilePayloadBuilder
 import com.synapse.runner.dto.PayinOrderFilePayload
 import com.synapse.task.TaskService
 import com.synapse.task.context.EventState
 import com.synapse.task.event.CompletionEvent
-import com.synapse.task.event.SynapseEvent
+import com.synapse.task.event.Event
 import com.synapse.task.util.Constants
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -19,9 +18,6 @@ import java.time.Instant
 class PaymentTaskService {
     @Autowired
     TaskService taskService
-
-    @Autowired
-    ObjectMapper mapper
 
     @PostConstruct
     void init() {
@@ -42,21 +38,22 @@ class PaymentTaskService {
         })
 
         //periodic task generation
-        taskService.config.getVertx().setPeriodic(1000, { handler ->
+        taskService.config.getVertx().setPeriodic(5000, { handler ->
 
             //deploy new task
-            taskService.executeTask({
-                SynapseEvent event = new SynapseEvent()
+            taskService.startTask({
+                Event event = new Event()
                   event.setTopic(testTopic)
                 addHeaders(event)
                 event.setKey(buildKey())
                 event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
                 return event
             }, { CompletionEvent body ->
-                System.out.println("completing... " + body.state)
                 switch (body.state) {
                     case EventState.Success:
+                    case EventState.DuplicateDetected:
                     case EventState.Closed:
+                    case EventState.Retry:
                         break
                     case EventState.Failed:
                     default:
@@ -66,12 +63,12 @@ class PaymentTaskService {
         })
     }
 
-    def addHeaders(SynapseEvent event) {
+    def addHeaders(Event event) {
         event?.putHeader("timestamp", Date.from(Instant.now()).toString())
     }
 
     private String buildKey() {
-        def messagePrefix
+        def messagePrefix = "PREFIX"
         String.format("%s_%s", messagePrefix, Clock.systemDefaultZone().millis())
     }
 }

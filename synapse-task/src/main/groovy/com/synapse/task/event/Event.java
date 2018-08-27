@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class SynapseEvent {
+public class Event {
     private String key;
     private String topic;
     private String message;

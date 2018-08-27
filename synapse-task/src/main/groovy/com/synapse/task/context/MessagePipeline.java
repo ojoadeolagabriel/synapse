@@ -2,30 +2,27 @@ package com.synapse.task.context;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.task.config.KafkaSynapseConfig;
-import com.synapse.task.event.SynapseEvent;
+import com.synapse.task.event.Event;
 import com.synapse.task.util.Constants;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 
 import java.io.IOException;
 
 public class MessagePipeline extends AbstractVerticle {
 
-    private static ObjectMapper mapper = new ObjectMapper();
-    private KafkaSynapseConfig config;
-    MessageConsumer consumer;
-
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private final KafkaSynapseConfig config;
     public MessagePipeline(KafkaSynapseConfig config) {
         this.config = config;
     }
 
     public void start() {
-        consumer = vertx.eventBus().consumer(Constants.DEFAULT_MESSAGE_PIPELINE, handler -> {
+        vertx.eventBus().consumer(Constants.DEFAULT_MESSAGE_PIPELINE, handler -> {
             Object objBody = handler.body();
             if (objBody != null) {
                 try {
-                    SynapseEvent event = mapper.readValue(objBody.toString(), SynapseEvent.class);
+                    Event event = mapper.readValue(objBody.toString(), Event.class);
                     processEvent(event);
                     handler.reply("ok");
                 } catch (IOException e) {
@@ -36,7 +33,7 @@ public class MessagePipeline extends AbstractVerticle {
         });
     }
 
-    private void processEvent(SynapseEvent event) {
+    private void processEvent(Event event) {
         MDContext.context().setEvent(event).handle(() -> {
             if (event != null) {
                 String key = event.getKey();

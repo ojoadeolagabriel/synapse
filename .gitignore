@@ -82,3 +82,4 @@ synapse-tests/src/main/java/
 synapse-tests/src/main/resources/
 synapse-tests/src/test/
 tendon/tmp/compileGroovy/
+/build/

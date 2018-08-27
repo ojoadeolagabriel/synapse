@@ -5,11 +5,13 @@ import com.synapse.task.config.KafkaSynapseConfig;
 import com.synapse.task.context.EventState;
 import com.synapse.task.context.MessagePipeline;
 import com.synapse.task.event.CompletionEvent;
-import com.synapse.task.event.SynapseEvent;
+import com.synapse.task.event.Event;
 import com.synapse.task.handler.KafkaTaskResponseHandler;
 import com.synapse.task.handler.ProcessCompletionHandler;
 import com.synapse.task.handler.SynapseTaskHandler;
 import com.synapse.task.util.Constants;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,13 +24,15 @@ public class TaskService {
 	public KafkaSynapseConfig config;
 	private MessagePipeline messagePipeline;
 	private static final Object lock = new Object();
+	JDBCClient jdbcClient;
 
-	TaskService(String bootStrapServers, String consumerGroup) {
+	TaskService(String bootStrapServers, String consumerGroup, JsonObject additionalConfig) {
 		config = new KafkaSynapseConfig(bootStrapServers, consumerGroup);
+		jdbcClient = JDBCClient.createShared(config.getVertx(), additionalConfig);
 	}
 
-	public void executeTask(SynapseTaskHandler eventBuildHandler, ProcessCompletionHandler onProcessCompletionHandler) {
-		SynapseEvent event = eventBuildHandler.handle();
+	public void startTask(SynapseTaskHandler eventBuildHandler, ProcessCompletionHandler onProcessCompletionHandler) {
+		Event event = eventBuildHandler.handle();
 		synchronized (lock) {
 			if (messagePipeline == null) {
 				messagePipeline = new MessagePipeline(config);
@@ -37,7 +41,6 @@ public class TaskService {
 		}
 
 		try {
-			//step 3
 			String payload = Constants.mapper.writeValueAsString(event);
 			config.kafkaResponseConsumer().subscribe(buildResponseTopic(event.getTopic()), handler -> {
 				try {
@@ -58,7 +61,6 @@ public class TaskService {
 				}
 			});
 
-			//send message (1)
 			config.getVertx().eventBus().send(Constants.DEFAULT_MESSAGE_PIPELINE, payload, replyHandler -> {
 				if (replyHandler.succeeded()) {
 				} else {
