@@ -21,7 +21,6 @@ public class MessagePipeline extends AbstractVerticle {
     }
 
     public void start() {
-        //step (2)
         consumer = vertx.eventBus().consumer(Constants.DEFAULT_MESSAGE_PIPELINE, handler -> {
             Object objBody = handler.body();
             if (objBody != null) {
@@ -38,17 +37,19 @@ public class MessagePipeline extends AbstractVerticle {
     }
 
     private void processEvent(SynapseEvent event) {
-        if (event != null) {
-            String key = event.getKey();
-            String topic = event.getTopic();
-            String message = event.getMessage();
+        MDContext.context().setEvent(event).handle(() -> {
+            if (event != null) {
+                String key = event.getKey();
+                String topic = event.getTopic();
+                String message = event.getMessage();
 
-            config.kafkaProducer().write(KafkaProducerRecord.create(topic, key, message), handler -> {
-                if (handler.succeeded()) {
-                    System.out.println("Successfully written message to topic: " + topic + " key: " + key + " payload: " + message);
-                }
-            });
-        }
+                config.kafkaProducer().write(KafkaProducerRecord.create(topic, key, message), handler -> {
+                    if (handler.succeeded()) {
+                        System.out.println("Successfully written message to topic: " + topic + " key: " + key + " payload: " + message);
+                    }
+                });
+            }
+        });
     }
 
     public void stop() {

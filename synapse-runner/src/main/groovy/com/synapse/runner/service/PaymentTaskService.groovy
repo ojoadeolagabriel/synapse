@@ -43,6 +43,7 @@ class PaymentTaskService {
 
         //periodic task generation
         taskService.config.getVertx().setPeriodic(1000, { handler ->
+
             //deploy new task
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
