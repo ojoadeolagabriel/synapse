@@ -52,8 +52,9 @@ public class TaskService {
                             data.setState(state);
                             onProcessCompletionHandler.handle(data);
 
-                            System.out.println("processing completion to: " + record.topic() + RESULT_POSTFIX);
+                            System.out.println("processing completion to: " + record.topic());
                             persistState(event.getKey(), Closed, event.getMessage());
+                            System.out.println("------------------------------------------");
                         });
                     }
                 } catch (Exception e) {

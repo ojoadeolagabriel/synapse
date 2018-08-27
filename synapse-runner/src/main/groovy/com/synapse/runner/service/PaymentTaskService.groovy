@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
 import java.time.Clock
+import java.time.Instant
 
 @Component
 class PaymentTaskService {
@@ -41,16 +42,17 @@ class PaymentTaskService {
         })
 
         //periodic task generation
-        taskService.config.getVertx().setTimer(1, { handler ->
+        taskService.config.getVertx().setPeriodic(1000, { handler ->
             //deploy new task
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
                 event.setTopic(testTopic)
-                event.putHeader("::unique::key::", "1")
+                addHeaders(event)
                 event.setKey(buildKey())
                 event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
                 return event
             }, { CompletionEvent body ->
+                System.out.println("completing... " + body.state)
                 switch (body.state) {
                     case EventState.Success:
                     case EventState.Closed:
@@ -61,6 +63,10 @@ class PaymentTaskService {
                 }
             })
         })
+    }
+
+    def addHeaders(SynapseEvent event) {
+        event?.putHeader("timestamp", Date.from(Instant.now()).toString())
     }
 
     private String buildKey() {
