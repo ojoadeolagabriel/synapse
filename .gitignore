@@ -83,3 +83,13 @@ synapse-tests/src/main/resources/
 synapse-tests/src/test/
 tendon/tmp/compileGroovy/
 /build/
+.vertx/
+synapse-config-client/build/tmp/
+synapse-config-server/build/classes/groovy/test/
+synapse-config-server/build/tmp/
+synapse-data/build/tmp/
+synapse-kafka-io/src/test/java/
+synapse-runner/build/libs/.vertx/
+synapse-runner/build/tmp/compileGroovy/
+synapse-task/build/tmp/compileGroovy/
+synapse-task/src/main/groovy/com/synapse/task/data/
