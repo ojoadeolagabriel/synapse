@@ -12,8 +12,11 @@ import com.synapse.task.handler.SynapseTaskHandler;
 import com.synapse.task.util.Constants;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.synapse.task.context.EventState.Closed;
 import static com.synapse.task.context.EventState.Retry;
@@ -102,7 +105,20 @@ public class TaskService {
 		return topic + RESULT_POSTFIX;
 	}
 
+	AtomicLong counter = new AtomicLong();
 	private void persistState(String id, EventState result, String value) {
 		System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
+		jdbcClient.getConnection(res -> {
+			if (res.succeeded()) {
+				SQLConnection connection = res.result();
+				connection.execute(String.format("replace into task (name, status) values ('%s','%s')", "Dummy" , result.getValue()), insert -> {
+					if (insert.succeeded()) {
+						System.out.println("insert successful: " + counter.addAndGet(1));
+					} else {
+						System.out.println("insert failed: " + insert.cause().getMessage());
+					}
+				});
+			}
+		});
 	}
 }
