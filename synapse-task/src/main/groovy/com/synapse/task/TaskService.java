@@ -1,25 +1,26 @@
 package com.synapse.task;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.task.config.KafkaSynapseConfig;
 import com.synapse.task.context.EventState;
-import com.synapse.task.event.SynapseEvent;
-import com.synapse.task.handler.ProcessCompletionHandler;
-import com.synapse.task.event.CompletionEvent;
 import com.synapse.task.context.MessagePipeline;
+import com.synapse.task.event.CompletionEvent;
+import com.synapse.task.event.SynapseEvent;
 import com.synapse.task.handler.KafkaTaskResponseHandler;
+import com.synapse.task.handler.ProcessCompletionHandler;
 import com.synapse.task.handler.SynapseTaskHandler;
 import com.synapse.task.util.Constants;
+import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.synapse.task.context.EventState.*;
+import static com.synapse.task.context.EventState.Closed;
+import static com.synapse.task.context.EventState.Retry;
+import static com.synapse.task.util.Constants.RESULT_POSTFIX;
 
 @Slf4j
 public class TaskService {
     public KafkaSynapseConfig config;
     private MessagePipeline messagePipeline;
-    private ObjectMapper mapper = new ObjectMapper();
     private static final Object lock = new Object();
 
     TaskService(String bootStrapServers, String consumerGroup) {
@@ -40,16 +41,21 @@ public class TaskService {
         }
 
         try {
+            //step 3
             String payload = Constants.mapper.writeValueAsString(event);
-
-            //setup completion first (3)
-            config.getVertx().eventBus().consumer(event.getKey(), handler -> {
+            config.kafkaResponseConsumer().subscribe(event.getTopic() + RESULT_POSTFIX, handler -> {
                 try {
-                    EventState state = EventState.valueOf(handler.body().toString());
-                    CompletionEvent data = new CompletionEvent();
-                    data.setState(state);
-                    onProcessCompletionHandler.handle(data);
-                    persistState(event.getKey(), Closed, event.getMessage());
+                    if (handler.succeeded()) {
+                        config.kafkaResponseConsumer().handler(record -> {
+                            EventState state = EventState.valueOf(record.value());
+                            CompletionEvent data = new CompletionEvent();
+                            data.setState(state);
+                            onProcessCompletionHandler.handle(data);
+
+                            System.out.println("processing completion to: " + record.topic() + RESULT_POSTFIX);
+                            persistState(event.getKey(), Closed, event.getMessage());
+                        });
+                    }
                 } catch (Exception e) {
                     persistState(event.getKey(), Retry, event.getMessage());
                 }
@@ -58,7 +64,6 @@ public class TaskService {
             //send message (1)
             config.getVertx().eventBus().send(Constants.DEFAULT_MESSAGE_PIPELINE, payload, replyHandler -> {
                 if (replyHandler.succeeded()) {
-                    //handle successfully received message
                 } else {
                     System.out.println("could not push: " + payload + " reason: " + replyHandler.cause().getMessage());
                 }
@@ -68,13 +73,26 @@ public class TaskService {
         }
     }
 
+    /**
+     * task completion
+     * @param id
+     * @param completionHandler
+     */
     public void completeTask(String id, KafkaTaskResponseHandler completionHandler) {
         config.kafkaConsumer().subscribe(id, subscribe -> {
             if (subscribe.succeeded()) {
+
+                //handler
                 config.kafkaConsumer().handler(record -> {
                     EventState result = completionHandler.handle(record.value());
                     persistState(id, result, record.value());
-                    config.getVertx().eventBus().send(record.key(), result.name());
+
+                    //replace with kafka
+                    config.kafkaProducer().write(KafkaProducerRecord.create(record.topic() + RESULT_POSTFIX, record.key(), result.name()), handler -> {
+                        if (handler.succeeded()) {
+                            System.out.println("sending completion to: " + record.topic() + RESULT_POSTFIX);
+                        }
+                    });
                 });
             }
         });
@@ -82,9 +100,5 @@ public class TaskService {
 
     private void persistState(String id, EventState result, String value) {
         System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
-    }
-
-    private void persistState(String uuid, String id, EventState result, String value) {
-        System.out.println(String.format("persisting.. %s %s, %s, %s", uuid, id, result.name(), value));
     }
 }

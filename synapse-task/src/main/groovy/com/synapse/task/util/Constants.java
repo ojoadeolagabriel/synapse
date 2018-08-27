@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 
 public class Constants {
     public static final int ONE = 1;
+    public static final String RESULT_POSTFIX = "_RESULT";
     public static final String DEFAULT_MESSAGE_PIPELINE = "::synapse.message.pipeline::";
     public static final ObjectMapper mapper;
 

@@ -32,7 +32,6 @@ class PaymentTaskService {
         taskService.completeTask(testTopic, {
             payload ->
                 try {
-                    System.out.println("completion received for payload: $payload")
                     PayinOrderFilePayload load = Constants.mapper.readValue(payload, PayinOrderFilePayload)
                     return load ? EventState.Success : EventState.Failed
                 } catch (Exception e) {
@@ -42,12 +41,12 @@ class PaymentTaskService {
         })
 
         //periodic task generation
-        taskService.config.getVertx().setPeriodic(1000, { handler ->
+        taskService.config.getVertx().setTimer(1, { handler ->
             //deploy new task
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
                 event.setTopic(testTopic)
-                event.putHeader("::unique::key::", 1)
+                event.putHeader("::unique::key::", "1")
                 event.setKey(buildKey())
                 event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
                 return event
