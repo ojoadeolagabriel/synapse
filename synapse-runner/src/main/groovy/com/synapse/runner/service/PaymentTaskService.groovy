@@ -47,7 +47,7 @@ class PaymentTaskService {
             //deploy new task
             taskService.executeTask({
                 SynapseEvent event = new SynapseEvent()
-                event.setTopic(testTopic)
+                  event.setTopic(testTopic)
                 addHeaders(event)
                 event.setKey(buildKey())
                 event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
