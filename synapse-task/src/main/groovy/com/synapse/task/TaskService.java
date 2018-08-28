@@ -118,6 +118,8 @@ public class TaskService {
 					} else {
 						System.out.println("insert failed: " + insert.cause().getMessage());
 					}
+
+					connection.close();
 				});
 			}
 		});
