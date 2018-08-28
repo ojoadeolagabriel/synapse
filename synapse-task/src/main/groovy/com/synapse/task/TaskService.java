@@ -109,9 +109,10 @@ public class TaskService {
 	private void persistState(String id, EventState result, String value) {
 		System.out.println(String.format("persisting.. %s, %s, %s", id, result.name(), value));
 		jdbcClient.getConnection(res -> {
+
 			if (res.succeeded()) {
 				SQLConnection connection = res.result();
-				connection.execute(String.format("replace into task (name, status) values ('%s','%s')", "Dummy" , result.getValue()), insert -> {
+				connection.execute(String.format("insert into task (name, status) values ('%s','%s')", "Dummy" , result.getValue()), insert -> {
 					if (insert.succeeded()) {
 						System.out.println("insert successful: " + counter.addAndGet(1));
 					} else {
