@@ -9,4 +9,5 @@ include 'synapse-kafka-io'
 gradle.ext.app_version = '1.0'
 include 'synapse-task'
 include 'synapse-runner'
+include 'synapse-security'
 
