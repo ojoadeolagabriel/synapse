@@ -46,7 +46,7 @@ class PaymentTaskService {
 		})
 
 		//periodic task generation
-		taskService.config.getVertx().setPeriodic(1, { handler ->
+		taskService.config.getVertx().setPeriodic(1000, { handler ->
 
 			//deploy new task
 			taskService.startTask({
