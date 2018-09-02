@@ -93,3 +93,12 @@ synapse-runner/build/libs/.vertx/
 synapse-runner/build/tmp/compileGroovy/
 synapse-task/build/tmp/compileGroovy/
 synapse-task/src/main/groovy/com/synapse/task/data/
+/synapse-runner/build/
+synapse-edge/src/
+synapse-kafka-io/src/main/groovy/
+synapse-runner/src/main/java/
+synapse-runner/src/test/
+synapse-security/src/
+synapse-task/src/main/java/
+synapse-task/src/main/resources/
+synapse-task/src/test/
