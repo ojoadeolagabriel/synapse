@@ -24,7 +24,7 @@ class PaymentTaskService {
 	void init() {
 
 		//post params
-		def testTopic = "topic.handler-x"
+		def testTopic = "topic.handler-x-2"
 
 		//handle things
 		taskService.completeTask(testTopic, {
@@ -46,7 +46,7 @@ class PaymentTaskService {
 		})
 
 		//periodic task generation
-		taskService.config.getVertx().setPeriodic(1, { handler ->
+		taskService.config.getVertx().setPeriodic(5000, { handler ->
 			//deploy new task
 			taskService.startTask({
 				Event event = new Event()

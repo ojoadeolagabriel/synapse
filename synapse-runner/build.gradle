@@ -47,6 +47,9 @@ configurations.all {
 }
 
 dependencies {
+    compile group: 'io.prometheus', name: 'simpleclient', version: '0.5.0'
+    compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.5.0'
+    compile group: 'io.prometheus', name: 'simpleclient_httpserver', version: '0.5.0'
     compile("org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE") {
         exclude module: "spring-boot-starter-logging"
     }
