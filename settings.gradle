@@ -11,4 +11,5 @@ include 'synapse-task'
 include 'synapse-runner'
 include 'synapse-security'
 include 'synapse-edge'
+include 'synapse-prometheus'
 
