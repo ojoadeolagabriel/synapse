@@ -16,6 +16,7 @@ class TaskServiceConfig {
 					put("url", "jdbc:mysql://localhost:3306/fx?user=root&password=password&autoReconnect=true&useSSL=false")
 					put("driver_class", "com.mysql.jdbc.Driver")
 					put("max_pool_size", 2000)
+					put("synapse.task.name", "lily")
 				}})
 		return taskService
 	}

@@ -1,49 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="7.8.1">
-<file name="C:\Projects\synapse-io\synapse-runner\build.gradle">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/build.gradle">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\RunnerApp.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/groovy/com/synapse/runner/RunnerApp.groovy">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\builder\PayinOrderFilePayloadBuilder.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/groovy/com/synapse/runner/api/HomeController.groovy">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\config\TaskServiceConfig.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/groovy/com/synapse/runner/builder/PayinOrderFilePayloadBuilder.groovy">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\dto\PayinOrderFilePayload.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/groovy/com/synapse/runner/config/TaskServiceConfig.groovy">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\service\PaymentTaskService$_init_closure1.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/groovy/com/synapse/runner/dto/PayinOrderFilePayload.groovy">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\service\PaymentTaskService$_init_closure2.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/groovy/com/synapse/runner/service/PaymentTaskService.groovy">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\service\PaymentTaskService$_init_closure2_closure3.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/resources/application.properties">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\service\PaymentTaskService$_init_closure2_closure4.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/resources/config/checkstyle/checkstyle.xml">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\classes\com\synapse\runner\service\PaymentTaskService.class">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/resources/config/checkstyle/suppressions.xml">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\resources\application.properties">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/resources/log4j.xml">
 </file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\resources\config\checkstyle\checkstyle.xml">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\resources\config\checkstyle\suppressions.xml">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\out\production\resources\logback.xml">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\groovy\com\synapse\runner\RunnerApp.groovy">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\groovy\com\synapse\runner\builder\PayinOrderFilePayloadBuilder.groovy">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\groovy\com\synapse\runner\config\TaskServiceConfig.groovy">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\groovy\com\synapse\runner\dto\PayinOrderFilePayload.groovy">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\groovy\com\synapse\runner\service\PaymentTaskService.groovy">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\resources\application.properties">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\resources\config\checkstyle\checkstyle.xml">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\resources\config\checkstyle\suppressions.xml">
-</file>
-<file name="C:\Projects\synapse-io\synapse-runner\src\main\resources\logback.xml">
+<file name="/Users/adeola.ojo/Documents/GitHub/synapse/synapse-runner/src/main/resources/logback.xml">
 </file>
 </checkstyle>

@@ -70,9 +70,10 @@ gradle.taskGraph.whenReady() {
 
 class Zipro extends DefaultTask{
     String path
+
     @TaskAction
     def process(){
-
+        String m = ""
     }
 }
 

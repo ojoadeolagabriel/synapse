@@ -7,7 +7,9 @@ import com.synapse.task.context.EventState
 import com.synapse.task.event.CompletionEvent
 import com.synapse.task.event.Event
 import com.synapse.task.util.Constants
+import com.synapse.task.valueobject.Error
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
@@ -17,14 +19,14 @@ import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class PaymentTaskService {
+
 	@Autowired
 	TaskService taskService
+	@Value('$test-topic:paymentTaskQueue')
+	String testTopic
 
 	@PostConstruct
 	void init() {
-
-		//post params
-		def testTopic = "topic.handler-x-2"
 
 		//handle things
 		taskService.completeTask(testTopic, {
@@ -56,7 +58,7 @@ class PaymentTaskService {
 				event.setMessage(PayinOrderFilePayloadBuilder.payloadBuilder())
 				return event
 			}, { CompletionEvent body ->
-				taskService.config.getVertx().setTimer(1,  {
+				taskService.config.getVertx().setTimer(1, {
 					counter.addAndGet(1)
 					switch (body.state) {
 						case EventState.Success:
@@ -71,6 +73,13 @@ class PaymentTaskService {
 				})
 			})
 		})
+	}
+
+	private Error buildError() {
+		return Error.builder()
+				.code("00")
+				.responseMessage("Success")
+				.build()
 	}
 
 	def addHeaders(Event event) {

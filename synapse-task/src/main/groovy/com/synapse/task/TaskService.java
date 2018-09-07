@@ -28,10 +28,12 @@ public class TaskService {
 	private MessagePipeline messagePipeline;
 	private static final Object lock = new Object();
 	JDBCClient jdbcClient;
+	String appName;
 
 	TaskService(String bootStrapServers, String consumerGroup, JsonObject additionalConfig) {
 		config = new KafkaSynapseConfig(bootStrapServers, consumerGroup);
 		jdbcClient = JDBCClient.createShared(config.getVertx(), additionalConfig);
+		appName = additionalConfig.getString("synapse.app.name");
 	}
 
 	public void startTask(SynapseTaskHandler eventBuildHandler, ProcessCompletionHandler onProcessCompletionHandler) {
