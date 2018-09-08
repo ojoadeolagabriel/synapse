@@ -1,7 +1,5 @@
 package com.synapse.metrics;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.HTTPServer;
@@ -16,12 +14,9 @@ public class App {
 
 	public static void main(String[] args) throws IOException {
 		HttpServer server = HttpServer.create(new InetSocketAddress(7800), 0);
-		server.createContext("/tick", new HttpHandler() {
-			@Override
-			public void handle(HttpExchange httpExchange) throws IOException {
-				requests.inc();
-				httpExchange.close();
-			}
+		server.createContext("/tick", httpExchange -> {
+			requests.inc();
+			httpExchange.close();
 		});
 
 		HTTPServer metricsServer = new HTTPServer(8085);

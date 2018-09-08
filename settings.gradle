@@ -12,4 +12,5 @@ include 'synapse-runner'
 include 'synapse-security'
 include 'synapse-edge'
 include 'synapse-prometheus'
+include 'synapse-bouncer'
 
