@@ -13,4 +13,5 @@ include 'synapse-security'
 include 'synapse-edge'
 include 'synapse-prometheus'
 include 'synapse-bouncer'
+include 'synapse-dynamic-ui'
 
